@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Board {
 
@@ -50,6 +51,81 @@ public class Board {
         // Maybe one method per diagonal flip bricks
         updateScore();
     }
+
+
+
+    private static final Point[] DIRECTIONS = {
+            new Point(-1, -1),  // NW
+            new Point(0, -1),   // N
+            new Point(1, -1),   // NE
+            new Point(1, 0),    // E
+            new Point(1, 1),    // SE
+            new Point(0, 1),    // S
+            new Point(-1, 1),   // SW
+            new Point(-1, 0),   // W
+
+
+    };
+
+    // May need boardStateMatrix or one board object for each state here later
+    private boolean legalMove(Point move, Player player) {
+
+        int[][] state = getCurrentBoardState();
+
+        if(move.y > 7 || move.x > 7 )
+            return false;
+
+        if (state[move.y][move.x] != Const.EMPTY)
+            return false;
+
+
+        int playerColor = player.getColor();
+        int opponentColor = (playerColor == Const.BLACK) ? Const.WHITE : Const.BLACK;
+
+
+        for (int i = 0; i < 8; ++i) {
+            int row = move.y + DIRECTIONS[i].y;
+            int col = move.x + DIRECTIONS[i].x;
+
+            boolean hasOpBetween = false;
+
+            while (pointOnBoard(row,col)) {
+
+                if (board[row][col] == opponentColor)
+                    hasOpBetween = true;
+                else if ((board[row][col] == playerColor) && hasOpBetween)
+                    return true;
+                else
+                    break;
+
+                row += DIRECTIONS[i].y;
+                col += DIRECTIONS[i].x;
+            }
+        }
+
+        return false;
+
+    }
+
+    public HashSet<Point> getLegalMoves(Player player) {
+        HashSet<Point> legalMoves = new HashSet<>();
+
+        for (int i = 0; i < Const.SIZE ; i++)
+            for (int j = 0; j < Const.SIZE ; j++) {
+                Point point = new Point(i,j);
+                if (legalMove(point, player))
+                    legalMoves.add(point);
+
+            }
+
+        return legalMoves;
+    }
+
+    private boolean pointOnBoard(int row, int col) {
+        return row >=0 && row < 8 && col >= 0 && col < 8;
+
+    }
+
 
     private void updateScore()  {
 

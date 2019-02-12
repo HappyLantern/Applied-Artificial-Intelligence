@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class ConsolePlayer implements Player {
     private int color;
@@ -10,8 +10,8 @@ public class ConsolePlayer implements Player {
     }
 
     @Override
-    public Point makeMove(ArrayList<Point> moves) {
-        return IO.getMove(moves);
+    public Point makeMove(HashSet<Point> moves) {
+        return IO.getConsolePlayerMove(moves);
     }
 
     @Override

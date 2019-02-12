@@ -1,8 +1,8 @@
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public interface Player {
 
-    Point makeMove(ArrayList<Point> moves);
+    Point makeMove(HashSet<Point> moves);
 
     String getName();
     int getColor();

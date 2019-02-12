@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class AIPlayer implements Player {
     private int color;
@@ -10,7 +10,7 @@ public class AIPlayer implements Player {
     }
 
     @Override
-    public Point makeMove(ArrayList<Point> moves) {
+    public Point makeMove(HashSet<Point> moves) {
         return null;
     }
 

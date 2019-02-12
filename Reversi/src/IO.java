@@ -1,10 +1,10 @@
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class IO {
 
-    public static void printBoard(Board b) {
+    static void printBoard(Board b) {
         int[][] board = b.getCurrentBoardState();
         System.out.println(" ");
         System.out.println("    A B C D E F G H");
@@ -18,13 +18,13 @@ public class IO {
         }
     }
 
-    public static Point getMove(ArrayList<Point> moves) {
+
+    static Point getConsolePlayerMove(HashSet<Point> moves) {
         Scanner scan = new Scanner(System.in);
         while(true) {
             printMoves(moves);
 
-            String move = scan.nextLine();
-            move.trim();
+            String move = scan.nextLine().trim();
             int x = move.charAt(0)-65;
             int y = move.charAt(1);
             Point p = new Point(x,y);
@@ -37,7 +37,7 @@ public class IO {
         }
     }
 
-    public static Player init() {
+    static Player init() {
         System.out.println("Hello!");
         System.out.println("Warm welcome to our implementation of Reversi! \n");
         Scanner scan = new Scanner(System.in);
@@ -54,24 +54,27 @@ public class IO {
         return new ConsolePlayer(name, playerColor);
     }
 
-    public static void printMoves(ArrayList<Point> moves) {
+    static void printMoves(HashSet<Point> moves) {
+
+        System.out.println(" ");
         for (Point p : moves)
-            System.out.print(p.print() + " ");
+            System.out.print(p.printInHumanLanguage() + " ");
+
         System.out.println();
     }
 
-    public static void printScore(int blackScore, int whiteScore) {
+    static void printScore(int blackScore, int whiteScore) {
         System.out.println("Current score; Black: " + blackScore + "White: " + whiteScore);
     }
-    public static void printWinner(Player player, int scoreDiff) {
+    static void printWinner(Player player, int scoreDiff) {
         System.out.println("Player " + player.getName() + " won with " + scoreDiff + " points. Congratulations!");
     }
-    public static void printDraw() {
+    static void printDraw() {
         System.out.println("It's a draw. Try again!");
 
     }
 
-    public static void printPlayers(HashMap<Integer,Player> playerHashMap) {
+    static void printPlayers(HashMap<Integer,Player> playerHashMap) {
         System.out.println(" ");
         System.out.println("BLACK - " + playerHashMap.get(Const.BLACK).getName()) ;
         System.out.println("WHITE - " + playerHashMap.get(Const.WHITE).getName()) ;

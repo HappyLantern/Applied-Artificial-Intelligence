@@ -16,6 +16,7 @@ class Game {
         activeGame = true;
 
         IO.printBoard(board);
+        IO.printMoves(board.getLegalMoves(players.get(Const.BLACK)));
 //        while(activeGame) {
 //
 //
