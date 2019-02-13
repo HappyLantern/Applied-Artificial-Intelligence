@@ -1,16 +1,16 @@
 public class Point  {
-    int x;
-    int y;
+    int col;
+    int row;
 
-    Point(int x, int y) {
-        this.x = x;
-        this.y = y;
+    Point(int col, int row) {
+        this.col = col;
+        this.row = row;
     }
 
 
     String printInHumanLanguage() {
-        String col = Character.toString((char)(x+65));
-        return col + (y+1);
+        String col = Character.toString((char)(this.col +65));
+        return col + (row +1);
     }
 
 }

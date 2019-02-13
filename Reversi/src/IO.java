@@ -6,6 +6,10 @@ public class IO {
 
     static void printBoard(Board b) {
         int[][] board = b.getCurrentBoardState();
+
+        System.out.println("Current score; \nBlack: " + b.score[Const.BLACK-1] + "\nWhite: " + b.score[Const.WHITE-1]);
+
+
         System.out.println(" ");
         System.out.println("    A B C D E F G H");
         System.out.println("--------------------------");
@@ -21,20 +25,13 @@ public class IO {
 
     static Point getConsolePlayerMove(HashSet<Point> moves) {
         Scanner scan = new Scanner(System.in);
-        while(true) {
-            printMoves(moves);
 
-            String move = scan.nextLine().trim();
-            int x = move.charAt(0)-65;
-            int y = move.charAt(1);
-            Point p = new Point(x,y);
+        String move = scan.nextLine().toUpperCase();
+        int col = move.charAt(0)-65;
+        int row = move.charAt(1)-49;
+        Point p = new Point(col , row);
 
-            if (moves.contains(p)) {
-                scan.close();
-                return p;
-            }
-            System.out.println("Try again...");
-        }
+        return p;
     }
 
     static Player init() {
@@ -63,9 +60,6 @@ public class IO {
         System.out.println();
     }
 
-    static void printScore(int blackScore, int whiteScore) {
-        System.out.println("Current score; Black: " + blackScore + "White: " + whiteScore);
-    }
     static void printWinner(Player player, int scoreDiff) {
         System.out.println("Player " + player.getName() + " won with " + scoreDiff + " points. Congratulations!");
     }
@@ -79,5 +73,12 @@ public class IO {
         System.out.println("BLACK - " + playerHashMap.get(Const.BLACK).getName()) ;
         System.out.println("WHITE - " + playerHashMap.get(Const.WHITE).getName()) ;
 
+    }
+
+    static AIPlayer initAI(int aiColor) {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("How much reasoning time (Unit: Seconds) is the SuperAwesomeAI allowed to have?");
+        int reasoning = scan.nextInt();
+        return new AIPlayer("SuperAwesomeAI", aiColor, reasoning);
     }
 }

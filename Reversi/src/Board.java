@@ -1,13 +1,11 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class Board {
 
     int[][] board;
-
-
-    private ArrayList<Point> blackScore;
-    private ArrayList<Point> whiteScore;
+    int[] score = {2, 2};
 
     Board() {
         board = new int[Const.SIZE][Const.SIZE];
@@ -41,15 +39,62 @@ public class Board {
 
     public ArrayList<Point> getAvailableMoves(Player player) {
         ArrayList<Point> moves = new ArrayList<Point>();
-
-
         return moves;
     }
 
-    public void makeMove(Point move) {
+    public void makeMove(Point move, Player player) {
         // Update board based on move, flip bricks, etc.
         // Maybe one method per diagonal flip bricks
-        updateScore();
+
+        int playerColor = player.getColor();
+        int opponentColor = (playerColor == Const.BLACK) ? Const.WHITE : Const.BLACK;
+
+        ArrayList<Point> flippedBricks = new ArrayList<>();
+        flippedBricks.add(move);
+
+        for (int i = 0; i < 8; ++i) {
+            int row = move.row + DIRECTIONS[i].row;
+            int col = move.col + DIRECTIONS[i].col;
+
+            boolean hasOpBetween = false;
+            ArrayList<Point> mayFlippedBricks = new ArrayList<>();
+
+            while (pointOnBoard(row,col)) {
+
+                if (board[row][col] == opponentColor)  {
+                    hasOpBetween = true;
+                    mayFlippedBricks.add(new Point(col,row));
+                }
+                else if ((board[row][col] == playerColor) && hasOpBetween) {
+                    flippedBricks.addAll(mayFlippedBricks);
+                    break;
+                }
+                else
+                    break;
+
+                row += DIRECTIONS[i].row;
+                col += DIRECTIONS[i].col;
+            }
+        }
+
+        updateBoardWithNewBricks(flippedBricks, player);
+        updateScore(flippedBricks, player);
+    }
+
+    private void updateScore(ArrayList<Point> flippedBricks, Player player) {
+        int opColor = player.getColor() == Const.BLACK ? Const.WHITE : Const.BLACK;
+        System.out.println(flippedBricks.size());
+        score[opColor-1] -= flippedBricks.size() - 1;
+        score[player.getColor()-1] += flippedBricks.size();
+
+
+    }
+
+
+    private void updateBoardWithNewBricks(ArrayList<Point> flippedBricks, Player player) {
+        for (Point p : flippedBricks) {
+            board[p.row][p.col] = player.getColor();
+        }
     }
 
 
@@ -64,7 +109,6 @@ public class Board {
             new Point(-1, 1),   // SW
             new Point(-1, 0),   // W
 
-
     };
 
     // May need boardStateMatrix or one board object for each state here later
@@ -72,10 +116,10 @@ public class Board {
 
         int[][] state = getCurrentBoardState();
 
-        if(move.y > 7 || move.x > 7 )
+        if(move.row > 7 || move.col > 7 )
             return false;
 
-        if (state[move.y][move.x] != Const.EMPTY)
+        if (state[move.row][move.col] != Const.EMPTY)
             return false;
 
 
@@ -84,8 +128,8 @@ public class Board {
 
 
         for (int i = 0; i < 8; ++i) {
-            int row = move.y + DIRECTIONS[i].y;
-            int col = move.x + DIRECTIONS[i].x;
+            int row = move.row + DIRECTIONS[i].row;
+            int col = move.col + DIRECTIONS[i].col;
 
             boolean hasOpBetween = false;
 
@@ -98,8 +142,8 @@ public class Board {
                 else
                     break;
 
-                row += DIRECTIONS[i].y;
-                col += DIRECTIONS[i].x;
+                row += DIRECTIONS[i].row;
+                col += DIRECTIONS[i].col;
             }
         }
 
@@ -127,12 +171,8 @@ public class Board {
     }
 
 
-    private void updateScore()  {
-
-    }
-
-    public int getScore() {
-        return 0;
+    public int getScore(Player p) {
+        return score[p.getColor() - 1];
     }
 
 }

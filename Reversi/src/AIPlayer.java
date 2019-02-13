@@ -3,15 +3,17 @@ import java.util.HashSet;
 public class AIPlayer implements Player {
     private int color;
     private String name;
+    private int reasoning;
 
-    public AIPlayer(String name, int color) {
+    public AIPlayer(String name, int color, int reasoning) {
         this.name = name;
         this.color = color;
+        this.reasoning = reasoning;
     }
 
     @Override
     public Point makeMove(HashSet<Point> moves) {
-        return null;
+        return moves.iterator().next();
     }
 
     @Override
