@@ -1,17 +1,18 @@
+
 import java.util.HashSet;
 
 public class AIPlayer implements Player {
 
     private int color;
     private String name;
-    private int reasoning;
+    private long reasoning;
     private long startTime;
     private long stopTime;
     private int maxDepth;
 
     private int searchedNodes;
 
-    public AIPlayer(String name, int color, int reasoning) {
+    public AIPlayer(String name, int color, long reasoning) {
         this.name = name;
         this.color = color;
         this.reasoning = reasoning;
@@ -35,44 +36,49 @@ public class AIPlayer implements Player {
     private Point makeDecision(HashSet<Point> moves, Board board) {
         int searchDepth = 0;
         searchedNodes = 0;
-        maxDepth = 4;
+        maxDepth = 7;
         startTime = System.currentTimeMillis();
-        stopTime = startTime + reasoning * 1000;
+        stopTime = startTime + reasoning;
 
 
         Point bestMove = null;
         int highestValue = Integer.MIN_VALUE;
 
         for (Point move : moves) {
-            board.updateBoard(move, getPlayerTurn(searchDepth));
-            int value = minValue(board, Integer.MIN_VALUE, Integer.MAX_VALUE, searchDepth);
+            Board b = new Board(board);
+            b.updateBoard(move, getPlayerTurn(searchDepth));
+            int value = minValue(b, Integer.MIN_VALUE, Integer.MAX_VALUE, ++searchDepth);
             if (value >= highestValue) {
                 highestValue = value;
                 bestMove = move;
             }
         }
 
-        System.out.println("Time: " + (System.currentTimeMillis() - startTime) + "ms");
-        System.out.println("Iterated nodes: " + searchedNodes);
+        IO.printMiniMaxSearchInfo((System.currentTimeMillis() - startTime), searchedNodes, maxDepth);
 
         return bestMove;
     }
 
     private int maxValue(Board board, int alpha, int beta, int searchDepth) {
-
+        searchDepth++;
         searchedNodes++;
         long elapsedTime = System.currentTimeMillis();
+        HashSet<Point> moves = board.getLegalMoves(getPlayerTurn(searchDepth));
 
-        if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
-            return getUtility(board, searchDepth);
+
+        if (moves.isEmpty() || elapsedTime > stopTime || searchDepth > maxDepth)
+            if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
+                return getUtility(board, searchDepth);
+
+
 
         int bestValue = Integer.MIN_VALUE;
 
-        HashSet<Point> moves = board.getLegalMoves(getPlayerTurn(searchDepth));
 
-        for (Point move : moves) { // moves does not exist. Whos turn is it?? Kepppppppokappa
-            board.updateBoard(move, getPlayerTurn(searchDepth));
-            bestValue = Math.max(bestValue, maxValue(board, alpha, beta, searchDepth++));
+        for (Point move : moves) {
+            Board b = new Board(board);
+            b.updateBoard(move, getPlayerTurn(searchDepth));
+            bestValue = Math.max(bestValue, maxValue(b, alpha, beta, searchDepth));
             if (bestValue >= beta)
                 return bestValue;
             alpha = Math.max(alpha, bestValue);
@@ -81,17 +87,23 @@ public class AIPlayer implements Player {
     }
 
     private int minValue(Board board, int alpha, int beta, int searchDepth) {
+        searchDepth++;
         searchedNodes++;
         long elapsedTime = System.currentTimeMillis();
-        if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
-            return getUtility(board, searchDepth);
 
-        int bestValue = Integer.MAX_VALUE;
         HashSet<Point> moves = board.getLegalMoves(getPlayerTurn(searchDepth));
 
+
+        if (moves.isEmpty() || elapsedTime > stopTime || searchDepth > maxDepth)
+            if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
+                return getUtility(board, searchDepth);
+
+        int bestValue = Integer.MAX_VALUE;
+
         for (Point move : moves) {
-            board.updateBoard(move, getPlayerTurn(searchDepth));
-            bestValue = Math.min(bestValue, maxValue(board, alpha, beta, searchDepth++));
+            Board b = new Board(board);
+            b.updateBoard(move, getPlayerTurn(searchDepth));
+            bestValue = Math.min(bestValue, maxValue(b, alpha, beta, searchDepth));
             if (bestValue <= alpha)
                 return bestValue;
             beta = Math.min(beta, bestValue);

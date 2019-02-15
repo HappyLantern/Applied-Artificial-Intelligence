@@ -12,6 +12,8 @@ public class ConsolePlayer implements Player {
 
   @Override
   public Point makeMove(HashSet<Point> moves, Board board) {
+
+    //return moves.iterator().next();
     return IO.getConsolePlayerMove(moves);
   }
 
