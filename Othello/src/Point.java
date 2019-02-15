@@ -1,5 +1,3 @@
-package reversi;
-
 public class Point  {
   int col;
   int row;

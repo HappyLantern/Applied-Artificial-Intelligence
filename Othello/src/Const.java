@@ -1,5 +1,3 @@
-package reversi;
-
 public class Const {
   
   static final int SIZE = 8;

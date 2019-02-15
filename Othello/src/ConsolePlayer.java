@@ -1,5 +1,3 @@
-package reversi;
-
 import java.util.HashSet;
 
 public class ConsolePlayer implements Player {

@@ -1,4 +1,3 @@
-package reversi;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -6,7 +5,7 @@ import java.util.HashSet;
 class Game {
 
   private Board board;
-  private HashMap<Integer,Player> players;
+  static HashMap<Integer,Player> players;
   private HashMap<Integer,Boolean> playerHasMoves;
   private int turn;
   private boolean activeGame = false;
@@ -38,14 +37,15 @@ class Game {
       Point move = null;
       boolean isLegalMove = false;
       while (!isLegalMove) {
-        move = players.get(turn).makeMove(availableMoves);
+        move = players.get(turn).makeMove(availableMoves, new Board(board));
         for (Point m : availableMoves) {
           if (m.col == move.col && m.row == move.row)
           isLegalMove = true;
         }
       }
+
       System.out.println((turn == Const.BLACK ? "BLACK" : "WHITE") + " made the move: " + move.printInHumanLanguage());
-      board.updateBoard(move, players.get(turn).getColor());
+      board.updateBoard(move, players.get(turn));
       IO.printBoard(board);
       turn = turn == Const.BLACK ? Const.WHITE : Const.BLACK;
     }

@@ -1,5 +1,3 @@
-package reversi;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,22 +13,24 @@ public class Board {
   }
 
   public Board(Board oldBoard) {
-    this.board = oldBoard.board;
-    this.score = oldBoard.score;
+    this.board = oldBoard.getCurrentBoardState();
+    this.score[Const.BLACK-1] = oldBoard.score[Const.BLACK-1];
+    this.score[Const.WHITE-1] = oldBoard.score[Const.WHITE-1];
+
   }
 
   public int[][] getCurrentBoardState() {
     int[][] boardCopy = new int[Const.SIZE][Const.SIZE];
+
     for (int i = 0; i < Const.SIZE ; i++)
-    for (int j = 0; j < Const.SIZE ; j++)
-    boardCopy[i][j] = board[i][j];
+      System.arraycopy(board[i], 0, boardCopy[i], 0, Const.SIZE);
 
     return boardCopy;
   }
 
-  public void updateBoard(Point move, int playerColor) {
+  public void updateBoard(Point move, Player currentPlayer) {
     
-    int opponentColor = (playerColor == Const.BLACK) ? Const.WHITE : Const.BLACK;
+    int opponentColor = (currentPlayer.getColor() == Const.BLACK) ? Const.WHITE : Const.BLACK;
 
     ArrayList<Point> flippedBricks = new ArrayList<>();
     flippedBricks.add(move);
@@ -48,7 +48,7 @@ public class Board {
           hasOpBetween = true;
           mayFlippedBricks.add(new Point(col,row));
         }
-        else if ((board[row][col] == playerColor) && hasOpBetween) {
+        else if ((board[row][col] == currentPlayer.getColor()) && hasOpBetween) {
           flippedBricks.addAll(mayFlippedBricks);
           break;
         }
@@ -60,8 +60,8 @@ public class Board {
       }
     }
 
-    updateBoardWithNewBricks(flippedBricks, player);
-    updateScore(flippedBricks, player);
+    updateBoardWithNewBricks(flippedBricks, currentPlayer);
+    updateScore(flippedBricks, currentPlayer);
   }
 
   public HashSet<Point> getLegalMoves(Player player) {
@@ -76,9 +76,9 @@ public class Board {
     return legalMoves;
   }
 
-  public boolean isTerminal() {
-    HashSet<Point> legalMoves1 = getLegalMoves(players.get(Const.BLACK));
-    HashSet<Point> legalMoves2 = getLegalMoves(players.get(Const.WHITE));
+  public boolean isTerminal(Player black, Player white) {
+    HashSet<Point> legalMoves1 = getLegalMoves(black);
+    HashSet<Point> legalMoves2 = getLegalMoves(white);
     if (legalMoves1.isEmpty() && legalMoves2.isEmpty())
       return true;
     return false;
@@ -138,7 +138,6 @@ public class Board {
     new Point(-1, 0),   // W
   };
 
-  // May need boardStateMatrix or one board object for each state here later
   private boolean legalMove(Point move, Player player) {
     int[][] state = getCurrentBoardState();
 

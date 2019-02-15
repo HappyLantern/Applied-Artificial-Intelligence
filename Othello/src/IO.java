@@ -1,5 +1,3 @@
-package reversi;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -19,7 +17,7 @@ public class IO {
 
   static Player init() {
     System.out.println("Hello!");
-    System.out.println("Warm welcome to our implementation of Reversi! \n");
+    System.out.println("Warm welcome to our implementation of Othello! \n");
     Scanner scan = new Scanner(System.in);
     System.out.println("Enter name please: ");
     String name = scan.nextLine();
@@ -35,9 +33,9 @@ public class IO {
 
   static AIPlayer initAI(int aiColor) {
     Scanner scan = new Scanner(System.in);
-    System.out.println("How much reasoning time (Unit: Seconds) is the SuperAwesomeAI allowed to have?");
+    System.out.println("How much reasoning time (Unit: Seconds) is Mr MiniMax McAlphaBetaPruneFace allowed to have?");
     int reasoning = scan.nextInt();
-    return new AIPlayer("SuperAwesomeAI", aiColor, reasoning);
+    return new AIPlayer("Mr MiniMax McAlphaBetaPruneFace", aiColor, reasoning);
   }
 
   static void printBoard(Board b) {
