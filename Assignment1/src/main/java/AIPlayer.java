@@ -36,7 +36,7 @@ public class AIPlayer implements Player {
     private Point makeDecision(HashSet<Point> moves, Board board) {
         int searchDepth = 0;
         searchedNodes = 0;
-        maxDepth = 7;
+        maxDepth = 8;
         startTime = System.currentTimeMillis();
         stopTime = startTime + reasoning;
 
@@ -67,8 +67,8 @@ public class AIPlayer implements Player {
 
 
         if (moves.isEmpty() || elapsedTime > stopTime || searchDepth > maxDepth)
-            if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
-                return getUtility(board, searchDepth);
+        if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
+        return getUtility(board, searchDepth);
 
 
 
@@ -80,7 +80,7 @@ public class AIPlayer implements Player {
             b.updateBoard(move, getPlayerTurn(searchDepth));
             bestValue = Math.max(bestValue, maxValue(b, alpha, beta, searchDepth));
             if (bestValue >= beta)
-                return bestValue;
+            return bestValue;
             alpha = Math.max(alpha, bestValue);
         }
         return bestValue;
@@ -93,10 +93,9 @@ public class AIPlayer implements Player {
 
         HashSet<Point> moves = board.getLegalMoves(getPlayerTurn(searchDepth));
 
-
         if (moves.isEmpty() || elapsedTime > stopTime || searchDepth > maxDepth)
-            if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
-                return getUtility(board, searchDepth);
+        if (isTerminal(board) || elapsedTime > stopTime || searchDepth > maxDepth)
+        return getUtility(board, searchDepth);
 
         int bestValue = Integer.MAX_VALUE;
 
@@ -105,7 +104,7 @@ public class AIPlayer implements Player {
             b.updateBoard(move, getPlayerTurn(searchDepth));
             bestValue = Math.min(bestValue, maxValue(b, alpha, beta, searchDepth));
             if (bestValue <= alpha)
-                return bestValue;
+            return bestValue;
             beta = Math.min(beta, bestValue);
         }
 
@@ -114,18 +113,18 @@ public class AIPlayer implements Player {
 
     private Player getPlayerTurn(int searchDepth) {
         if (searchDepth % 2 == 0)
-            return Game.players.get(color);
+        return Game.players.get(color);
         else
-            return color == Const.BLACK ? Game.players.get(Const.WHITE) : Game.players.get(Const.WHITE);
+        return color == Const.BLACK ? Game.players.get(Const.WHITE) : Game.players.get(Const.WHITE);
 
     }
 
     private int getUtility(Board boardState, int searchDepth) {
         int opColor = (color == Const.BLACK ? Const.WHITE : Const.BLACK);
         if (searchDepth % 2 == 0)
-            return boardState.getUtilityValue(color, opColor);
+        return boardState.getUtilityValue(color, opColor);
         else
-            return boardState.getUtilityValue(opColor, color);
+        return boardState.getUtilityValue(opColor, color);
     }
 
     private boolean isTerminal(Board board) {

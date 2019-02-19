@@ -3,7 +3,9 @@ import java.util.HashSet;
 
 public class Board {
 
-    private static final Point[] DIRECTIONS = {
+  int[] score = {2, 2};
+  int[][] board;
+  private static final Point[] DIRECTIONS = {
             new Point(-1, -1),  // NW
             new Point(0, -1),   // N
             new Point(1, -1),   // NE
@@ -13,8 +15,6 @@ public class Board {
             new Point(-1, 1),   // SW
             new Point(-1, 0),   // W
     };
-    int[][] board;
-    int[] score = {2, 2};
 
     public Board() {
         board = new int[Const.SIZE][Const.SIZE];
@@ -38,12 +38,10 @@ public class Board {
     }
 
     public void updateBoard(Point move, Player currentPlayer) {
-
         int opponentColor = (currentPlayer.getColor() == Const.BLACK) ? Const.WHITE : Const.BLACK;
 
         ArrayList<Point> flippedBricks = new ArrayList<>();
         flippedBricks.add(move);
-
         for (int i = 0; i < 8; ++i) {
             int row = move.row + DIRECTIONS[i].row;
             int col = move.col + DIRECTIONS[i].col;
@@ -66,7 +64,6 @@ public class Board {
                 col += DIRECTIONS[i].col;
             }
         }
-
         updateBoardWithNewBricks(flippedBricks, currentPlayer);
         updateScore(flippedBricks, currentPlayer);
     }
@@ -92,19 +89,27 @@ public class Board {
     }
 
     public int getUtilityValue(int color, int opColor) {
-        int sum = 0;
-        int n = 0;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (board[i][j] == color)
-                    sum += Const.eval[n];
-                if (board[i][j] == opColor)
-                    sum -= Const.eval[n];
-                n++;
-            }
-        }
-        return sum;
-    }
+
+          int sum = 0;
+          // endgame
+          if (score[Const.WHITE-1] + score[Const.BLACK-1] > 58) {
+              for (int i = 0; i < 8; i++)
+                  for (int j = 0; j < 8; j++)
+                      if (board[i][j] == color)
+                          sum += 1;
+              return sum;
+          }
+          // init
+          int n = 0;
+          for (int i = 0; i < 8; i++) {
+              for (int j = 0; j < 8; j++) {
+                  if (board[i][j] == color)
+                      sum += Const.eval[n];
+                  n++;
+              }
+          }
+          return sum;
+      }
 
     public int getScore(Player p) {
         return score[p.getColor() - 1];

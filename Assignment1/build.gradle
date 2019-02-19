@@ -13,4 +13,4 @@ run {
 }
 
 // Define the main class for the application
-mainClassName = 'reversi.Main'
+mainClassName = 'Main'
