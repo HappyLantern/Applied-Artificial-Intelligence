@@ -50,42 +50,53 @@ public class DummyLocalizer implements EstimatorInterface {
 		for (int nX = 0; nX < rows - 1; nX++) {
 			for (int nY = 0; nY < cols - 1; nY++) {
 				for (int nH = 0; nH < head - 1; nH++) {
-					transitionMatrix[matrixRow][matrixCol] = calcTProb(x, y, h, nX, nY, nH);
+					transitionMatrix[matrixRow][matrixCol] = getTProb(x, y, h, nX, nY, nH);
 					matrixCol++;
 				}
 			}
 		}	
 	}
+	
+
+
+	private boolean onMap(int x, int y) {
+		return ( x >= 0 && x < rows ) && ( y >= 0 && y < cols);
+	}
+	
+	private static final int[][] DIRECTIONS = {
+			{-1,0}, // West
+			{0, 1},  // North
+			{1, 0},  // East
+			{0,-1}};// South
 
 	// Calculate probability based on rules
 	// P(nH == h | not encountering a wall) = 0.7
 	// P(nH != h | not encountering a wall) = 0.3
 	// P(nH == h | encountering a wall) = 0.0
-	// P(nH != h | encountering a wall) = 1.0
-	private double calcTProb(int x, int y, int h, int nX, int nY, int nH) {
-//		boolean isAtCorner = isAtCorner(x, y, h);
-//		boolean isAtWall = isAtWall(x, y, h);
-		boolean isInFrontOf = isInFrontOf(x, y, h, nX, nY, nH);
-		boolean isRightOf = isRightOf(x, y, h, nX, nY, nH);
-		boolean isLeftOf = isLeftOf(x, y, h, nX, nY, nH);
-		boolean isBehindOf = isBehindOf(x, y, h, nX, nY, nH);		
-		boolean encounteringWall = encounteringWall(x, y, h, nX, nY, nH);
-
-		if (!encounteringWall && isInFrontOf)
-			return 0.7;
-		if (!encounteringWall && isLeftOf)
-			return 0.3;
-		if (!encounteringWall && isRightOf)
-			return 0.3;
-		if (!encounteringWall && isBehindOf)
-			return 0.3;	
-		return 0.0;
-		}
-
+	// P(nH != h | encountering a wall) = 1.0	
 	// Get transition probability for robot
+	 // Transform (x, y, h) & (nX, nY, nH) to coordinates in transitionMatrix
 	public double getTProb( int x, int y, int h, int nX, int nY, int nH) {
-		 // Transform (x, y, h) & (nX, nY, nH) to coordinates in transitionMatrix
-		return transitionMatrix[0][0];
+		
+		int availableDirections = 4;
+		
+		for ( int i = 0 ; i < DIRECTIONS.length ; i++)
+			if (!onMap( x + DIRECTIONS[i][0], y + DIRECTIONS[i][1])) --availableDirections;
+		
+
+        if ( x + DIRECTIONS[nH][0] == nX && y + DIRECTIONS[nH][1] == nY ) {
+        		if (h == nH)
+        			return 0.7;
+        		
+        		else 
+        			if (!onMap(x + DIRECTIONS[h][0], y + DIRECTIONS[h][1])) 
+        				return 1.0 / availableDirections;
+        			else
+        				return 0.3 / (availableDirections - 1);
+        		
+        	} 
+        
+        	return 0.0;
 	}
 
 	private boolean isLeftOf(int x, int y, int h, int nX, int nY, int nH) {
@@ -132,7 +143,7 @@ public class DummyLocalizer implements EstimatorInterface {
 			return true;
 		return false;
 	}
-
+	
 	private boolean encounteringWall(int x, int y, int h, int nX, int nY, int nH) {
 		if (x + 1 == rows - 1 && x + 1 == nX)
 			return true;
@@ -145,7 +156,6 @@ public class DummyLocalizer implements EstimatorInterface {
 		return false;
 	}
 	
-
 	private boolean isNextToPosition(int x, int y, int h, int nX, int nY, int nH) {
 		if (x + 1 == nX && y == nY || x - 1 == nX && y == nY || x == nX && y + 1 == nY || x == nX && y - 1 == nY) {
 			return true;
