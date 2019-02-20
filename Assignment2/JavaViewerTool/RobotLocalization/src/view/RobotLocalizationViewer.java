@@ -238,6 +238,7 @@ public class RobotLocalizationViewer {
 	public void updateTransitionView() {
 
 		int x, y, h;
+		System.out.println(tXCount +  " " + tYCount + " " + tHCount);
 		
 		for( x=0; x<rows; x++) {
 			for( y=0; y<cols; y++) {

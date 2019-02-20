@@ -39,6 +39,7 @@ public interface EstimatorInterface {
 	 * returns the currently available sensor reading obtained for the true position 
 	 * after the simulation step 
 	 * returns null if the reading was "nothing" (whatever that stands for in your model)
+	 * The position that the sensor thinks that it is at
 	 */
 	public int[] getCurrentReading();
 	
