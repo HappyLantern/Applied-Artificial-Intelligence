@@ -9,9 +9,20 @@ public class DummyLocalizer implements EstimatorInterface {
 	private int rows, cols, head;
 	private double[][] transitionMatrix;
 	private double[][] observationMatrix;
+	private double[] fVector;
 	
-	private double[][] fMatrix;
 	int currentTrueState[] = { -1, -1, -10 };
+	private static final int[][] POSITIONS_UNO = { { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, -1 }, { -1, 1 },
+			{ 1, 1 }, { 1, -1 } };
+
+	private static final int[][] POSITIONS_DOS = { { -2, 0 }, { -2, -1 }, { -2, -2 }, { 1, -2 }, { 0, -2 }, { 1, 2 },
+			{ 2, -2 }, { 2, -1 }, { 2, 0 }, { 2, 1 }, { 2, 2 }, { -1, -2 }, { 0, 2 }, { -1, 2 }, { -2, 2 }, { -2, 1 } };
+	private static final int[][] DIRECTIONS = { 
+			{ -1, 0 }, // West
+			{ 0, 1 }, // North
+			{ 1, 0 }, // East
+			{ 0, -1 } };// South
+
 
 
 	private static final int NORTH = 0;
@@ -23,23 +34,21 @@ public class DummyLocalizer implements EstimatorInterface {
 		this.rows = rows;
 		this.cols = cols;
 		this.head = head;
+
+		
 		transitionMatrix = new double[rows * cols * head][rows * cols * head];
 		observationMatrix = new double[rows * cols + 1][rows * cols * head];
 		fillTransitionMatrix();
 		fillObservationVectors();
-		for (int i = 0; i < rows * cols * head; i++) {
-			for (int j = 0; j < rows * cols * head; j++) {
-				System.out.print(transitionMatrix[i][j] + " ");
-			}
-			System.out.println();
-		}
-		System.out.println();
-		for (int i = 0; i < rows * cols + 1; i++) {
-			for (int j = 0; j < rows * cols * head; j++) {
-				System.out.print(observationMatrix[i][j] + " ");
-			}
-			System.out.println();
-		}
+		fillFMatrix();
+		
+	}
+	
+	private void fillFMatrix() {
+		fVector = new double[rows*cols*head];
+		for (int i = 0 ; i < rows*cols*head ; i++)
+				fVector[i]= 1.0/((double) rows*cols*head);
+
 	}
 
 	private void fillObservationVectors() {
@@ -83,9 +92,6 @@ public class DummyLocalizer implements EstimatorInterface {
 		for (int x = 0; x < rows; x++) {
 			for (int y = 0; y < cols; y++) {
 				for (int h = 0; h < head; h++) {
-					// System.out.println("Row" + x + " " + y + " " + h);
-					// This is each of the 255 rows for 8x8. Then fill probability for every column
-					// in each row
 					fillTransitionMatrixRow(x, y, h, matrixRow);
 					matrixRow++;
 				}
@@ -99,9 +105,9 @@ public class DummyLocalizer implements EstimatorInterface {
 		for (int nX = 0; nX < rows; nX++) {
 			for (int nY = 0; nY < cols; nY++) {
 				for (int nH = 0; nH < head; nH++) {
-					// System.out.println("Col" + nX + " " + nY + " " + nH);
+				
 					double prob = getTProb(x, y, h, nX, nY, nH);
-					// System.out.println(prob);
+					
 					transitionMatrix[matrixRow][matrixCol] = prob;
 					matrixCol++;
 				}
@@ -110,15 +116,10 @@ public class DummyLocalizer implements EstimatorInterface {
 	}
 
 	private boolean onMap(int x, int y) {
-		System.out.println("MAP: " + x + " " + y);
 		return (x >= 0 && x < rows) && (y >= 0 && y < cols);
 	}
 
-	private static final int[][] DIRECTIONS = { 
-			{ -1, 0 }, // West
-			{ 0, 1 }, // North
-			{ 1, 0 }, // East
-			{ 0, -1 } };// South
+	
 
 	// Calculate probability based on rules
 	// P(nH == h | not encountering a wall) = 0.7
@@ -147,14 +148,9 @@ public class DummyLocalizer implements EstimatorInterface {
 		return 0.0;
 	}
 
-	private static final int[][] POSITIONS_UNO = { { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, -1 }, { -1, 1 },
-			{ 1, 1 }, { 1, -1 } };
-
-	private static final int[][] POSITIONS_DOS = { { -2, 0 }, { -2, -1 }, { -2, -2 }, { 1, -2 }, { 0, -2 }, { 1, 2 },
-			{ 2, -2 }, { 2, -1 }, { 2, 0 }, { 2, 1 }, { 2, 2 }, { -1, -2 }, { 0, 2 }, { -1, 2 }, { -2, 2 }, { -2, 1 } };
-
+	
 	// Get sensor reading probability
-	// r = blå
+	// r = blï¿½
 	// xy = truePos
 	public double getOrXY(int rX, int rY, int x, int y, int h) {
 		int availableOuterDos = 16;
@@ -170,8 +166,7 @@ public class DummyLocalizer implements EstimatorInterface {
 			if (!onMap(x + POSITIONS_DOS[i][0], y + POSITIONS_DOS[i][1]))
 				--availableOuterDos;
 
-		// System.out.println("UNO: " + availableOuterUno);
-		// System.out.println("DOS;: " + availableOuterDos);
+	
 
 		if (truePosition(rX, rY, x, y))
 			return 0.1;
@@ -179,7 +174,7 @@ public class DummyLocalizer implements EstimatorInterface {
 			return 0.05;
 		if (twoFromPosition(rX, rY, x, y))
 			return 0.025;
-		System.out.println(rX + " " + rY);
+
 		if (!onMap(rX, rY))
 			return 1.0 - 0.1 - availableOuterUno * 0.05 - availableOuterDos * 0.025;
 		return 0.0;
@@ -193,37 +188,7 @@ public class DummyLocalizer implements EstimatorInterface {
 				|| rX == x - 2 && rY == y - 1 || rX == x - 2 && rY == y + 2 || rX == x - 2 && rY == y - 2;
 	}
 
-	private double[][] multiplyMatrix(double[][] m1, double[][] m2) {
-		int m1ColLength = m1[0].length;
-		int m2RowLength = m2.length;
-		if (m1ColLength != m2RowLength)
-			return null;
-
-		int m3RowLength = m1.length;
-		int m3ColLength = m2[0].length;
-
-		double[][] m3 = new double[m3RowLength][m3ColLength];
-		for (int i = 0; i < m3RowLength; i++) { // rows from m1
-			for (int j = 0; j < m3ColLength; j++) { // columns from m2
-				for (int k = 0; k < m1ColLength; k++) { // columns from m1
-					m3[i][j] += m1[i][k] * m2[k][j];
-				}
-			}
-		}
-		return m3;
-	}
-
-	private double[][] transposeMatrix(double[][] m) {
-		int rowLength = m.length;
-		int colLength = m[0].length;
-
-		double[][] t = new double[colLength][rowLength];
-		for (int i = 0; i < rowLength; i++)
-			for (int j = 0; j < colLength; j++)
-				t[j][i] = m[i][j];
-
-		return t;
-	}
+	
 
 	private boolean oneFromPosition(int rX, int rY, int x, int y) {
 		return rX == x && rY == y - 1 || rX == x && rY == y + 1 || rX == x + 1 && rY == y || rX == x - 1 && rY == y
@@ -263,66 +228,175 @@ public class DummyLocalizer implements EstimatorInterface {
 		int availableSecond = 16; // Assume
 
 		
-		System.out.println("Random " + random);
-		System.out.println("Zero " + zero);
-		System.out.println("FirstLayer " +  (zero + firstLayer * availableFirst));
-		System.out.println("SecondLayer " +( zero + firstLayer * availableFirst + secondLayer * availableSecond));
-
+		
 		
 
 		if (random < 100) {
-			System.out.println("True loc: " + sensorLocation);
+			
 			return sensorLocation;
 			
 		} else if (zero < random && random < zero + firstLayer * availableFirst) {
-			System.out.println("One from location");
+
 			int r = new Random().nextInt(POSITIONS_UNO.length);
-			System.out.println("DIR " + POSITIONS_UNO[r][0] + " " + POSITIONS_UNO[r][1]);
-			System.out.println("POS " +sensorLocation[0] + " " + sensorLocation[1]);
+			
 
 			if (onMap(sensorLocation[0] + POSITIONS_UNO[r][0], sensorLocation[1] + POSITIONS_UNO[r][1]))
 				randomSensorDirection = POSITIONS_UNO[r];
 			else {
-				System.out.println("Not on map");
 				return nothing;
 				
 			}
 			
 		} else if ((zero + firstLayer * availableFirst) < random && random < zero + firstLayer * availableFirst + secondLayer * availableSecond) {
-			// FIX THIS SAME AS THE ONE ABOVE ish
-			System.out.println("Two from location");
+
 			int r = new Random().nextInt(POSITIONS_DOS.length);
 			if (onMap(sensorLocation[0] + POSITIONS_DOS[r][0], sensorLocation[1] + POSITIONS_DOS[r][1]))
 				randomSensorDirection = POSITIONS_DOS[r];
 			else {
-				System.out.println("Not on map");
+
 				return nothing;
 			}
 		} else {
-			System.out.println("Nothing");
+			
 			return nothing;
 		}
 
 		sensorLocation[0] = sensorLocation[0] + randomSensorDirection[0];
 		sensorLocation[1] = sensorLocation[1] + randomSensorDirection[1];
-		System.out.println("Something: " + sensorLocation[0] + " " + sensorLocation[1]);
+
 
 		return sensorLocation;
 	}
+	
+	
+	
 
-	//  f = a OTtf
-	public double getCurrentProb(int x, int y) {
-		  double prob = 0.0; 
 
+	public double getCurrentProb(int x, int y) {	
 		  
-		  return prob; 
+		  double sum = 0;
+		  for (int i = 0; i < 4 ; i++)
+			  sum += fVector[(x*rows+y)*4 + i];
+		 
+		  
+		  return sum; 
 	}
 	
+	private void updateFVector() {
+		int[] sensor = getCurrentReading();
+		double[] ove = observationMatrix[rows*cols];
+		
+//		System.out.println("");
+		if (sensor[0] > 0)
+			ove = observationMatrix[sensor[0]*4+sensor[1]];
+		
+//		for (int i = 0 ; i < ove.length ; i++) {
+//				System.out.print(ove[i] + " ");
+//		}
+//		System.out.println();
+		
+		double[][] oM = vectorToDiagonalMatrix(ove);
+		
+//		for (int i = 0 ; i < oM.length ; i++) {
+//			for (int j = 0 ; j < oM.length ; j++)
+//				System.out.print(oM[i][j] + " ");
+//			
+//			System.out.println();
+//		}
+		
+
+		double[][] tT = transposeMatrix(transitionMatrix);
+		
+//		for (int i = 0 ; i < tT.length ; i++) {
+//			for (int j = 0 ; j < tT.length ; j++)
+//				System.out.print(tT[i][j] + " ");
+//			
+//			System.out.println();
+//		}
+		for (int i = 0 ; i < transitionMatrix.length ; i++) {
+			for (int j = 0 ; j < transitionMatrix.length ; j++)
+				System.out.print(transitionMatrix[i][j] + " ");
+			
+			System.out.println();
+		}
+		
+		double[][] temp = multiplyMatrix(oM, tT);
+		
+		double[] temp2 = multiplyMatrix(temp, fVector);
+		
+		fVector = temp2;
+		
+//		for (int i = 0 ; i < temp2.length ; i++) 
+//				System.out.print(temp2[i] + " ");
+//		
+//		System.out.println();
+	
+		
+		
+
+		
+	}
+	
+	
+	private double[][] vectorToDiagonalMatrix(double[] vector) {
+		double[][] temp = new double[vector.length][vector.length];
+		
+		for (int i = 0 ; i < vector.length ; i++)
+			temp[i][i] = vector[i];
+		
+//		for (int i = 0 ; i < temp.length ; i++) {
+//			System.out.print(temp[i][i] + " ");
+//		}
+		
+		return temp;
+	}
+	
+	private double[] multiplyMatrix(double[][] a, double[] x) {
+        int m = a.length;
+        int n = a[0].length;
+        if (x.length != n) throw new RuntimeException("Illegal matrix dimensions.");
+        double[] y = new double[m];
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++)
+                y[i] += a[i][j] * x[j];
+        
+        return y;
+    }
+	
+	private double[][] multiplyMatrix(double[][] a, double[][] b) {
+		int m1 = a.length;
+        int n1 = a[0].length;
+        int m2 = b.length;
+        int n2 = b[0].length;
+        if (n1 != m2) throw new RuntimeException("Illegal matrix dimensions.");
+        double[][] c = new double[m1][n2];
+        for (int i = 0; i < m1; i++)
+            for (int j = 0; j < n2; j++)
+                for (int k = 0; k < n1; k++)
+                    c[i][j] += a[i][k] * b[k][j];
+        return c;
+	}
+
+	private double[][] transposeMatrix(double[][] m) {
+		int rowLength = m.length;
+		int colLength = m[0].length;
+
+		double[][] t = new double[colLength][rowLength];
+		for (int i = 0; i < rowLength; i++)
+			for (int j = 0; j < colLength; j++)
+				t[j][i] = m[i][j];
+
+		return t;
+	}
+
+	
+	
+
+
 
 
 	public void update() {
 		int[] trueState = getCurrentTrueState();
-		System.out.println(trueState[0] + " " + trueState[1] + " " + trueState[2]);
 		int tRow = trueState[0];
 		int tCol = trueState[1];
 		int tHead = trueState[2];
@@ -336,17 +410,12 @@ public class DummyLocalizer implements EstimatorInterface {
 		else
 			newHead = tHead;
 
-		System.out.println("Y2: " + (tCol + DIRECTIONS[newHead][1]));
-		System.out.println("HEAD: " + newHead);
-		System.out.println("ROW: " + trueState[0] + " = " + tRow + " + " + DIRECTIONS[newHead][0]);
-		System.out.println("COL: " + trueState[1] + " = " + tCol + " + " + DIRECTIONS[newHead][1]);
-
+		
 		currentTrueState[0] = tRow + DIRECTIONS[newHead][0];
 		currentTrueState[1] = tCol + DIRECTIONS[newHead][1];
 		currentTrueState[2] = newHead;
-		System.out.println("ROBOT: " + currentTrueState[0] + " " + currentTrueState[1]);
+		updateFVector();
 
-		// System.out.println("Nothing is happening, no model to go for...");
 	}
 
 }
