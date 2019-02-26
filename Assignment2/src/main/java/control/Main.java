@@ -15,7 +15,7 @@ public class Main {
 		 * generate you own localiser / estimator wrapper here to plug it into the 
 		 * graphics class.
 		 */
-		EstimatorInterface l = new DummyLocalizer( 4, 4, 4);
+		EstimatorInterface l = new DummyLocalizer( 8, 8, 4);
 
 		RobotLocalizationViewer viewer = new RobotLocalizationViewer( l);
 
